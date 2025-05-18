@@ -7,6 +7,10 @@ platforms: linux/amd64
 
 image: ghcr.io/frauniki/docker-build-action-test
 
+push: false
+
+registry: ghcr.io
+
 tags: type=raw,value=latest
 
 flavor: latest=auto

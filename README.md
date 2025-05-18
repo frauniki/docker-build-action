@@ -39,7 +39,6 @@ jobs:
       - name: Build Docker image
         uses: frauniki/docker-build-action@main
         with:
-          push: true
           config-file: docker-build.yaml
 ```
 
@@ -59,6 +58,12 @@ platforms: linux/amd64,linux/arm64
 
 # Image name (required)
 image: ghcr.io/username/image-name
+
+# Whether to push the image to the registry (default: "false")
+push: true
+
+# Docker registry to push to (default: "ghcr.io")
+registry: ghcr.io
 
 # Tags configuration (same format as docker/metadata-action)
 tags:
@@ -80,8 +85,6 @@ labels:
 | Name | Description | Required | Default |
 |------|-------------|----------|---------|
 | `config-file` | Path to the docker-build.yaml configuration file | No | `docker-build.yaml` |
-| `push` | Whether to push the Docker image to the registry | No | `false` |
-| `registry` | Docker registry to push to | No | `ghcr.io` |
 
 ## Example Configuration
 
@@ -92,14 +95,10 @@ context: .
 dockerfile: Dockerfile
 platforms: linux/amd64,linux/arm64
 image: ghcr.io/username/image-name
-tags:
-  type: raw
-  value: latest
-  enable: true
-flavor:
-  latest: auto
-  prefix: ''
-  suffix: ''
+push: true
+registry: ghcr.io
+tags: type=raw,value=latest
+flavor: latest=auto
 labels:
   org.opencontainers.image.title: My Image
   org.opencontainers.image.description: My Docker Image

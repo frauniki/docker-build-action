@@ -10,14 +10,6 @@ inputs:
     description: 'Path to the docker-build.yaml configuration file'
     required: false
     default: 'docker-build.yaml'
-  push:
-    description: 'Whether to push the Docker image to the registry'
-    required: false
-    default: 'false'
-  registry:
-    description: 'Docker registry to push to'
-    required: false
-    default: 'ghcr.io'
 
 runs:
   using: 'composite'
@@ -48,11 +40,17 @@ runs:
           exit 1
         fi
         
+        # Extract push and registry settings from config
+        PUSH=$(yq -r '.push // "false"' ${{ inputs.config-file }})
+        REGISTRY=$(yq -r '.registry // "ghcr.io"' ${{ inputs.config-file }})
+        
         # Set outputs
         echo "context=$CONTEXT" >> $GITHUB_OUTPUT
         echo "dockerfile=$DOCKERFILE" >> $GITHUB_OUTPUT
         echo "platforms=$PLATFORMS" >> $GITHUB_OUTPUT
         echo "image=$IMAGE_NAME" >> $GITHUB_OUTPUT
+        echo "push=$PUSH" >> $GITHUB_OUTPUT
+        echo "registry=$REGISTRY" >> $GITHUB_OUTPUT
         
         # Extract metadata configuration - use -r to get raw string values
         TAGS=$(yq -r '.tags' ${{ inputs.config-file }})
@@ -66,11 +64,12 @@ runs:
         fi
         
         # For labels, we need to handle the YAML object structure
-        LABELS=$(yq -r '.labels' ${{ inputs.config-file }})
-        if [ "$LABELS" != "null" ]; then
+        if yq -e '.labels' ${{ inputs.config-file }} > /dev/null 2>&1; then
           # Convert YAML labels to JSON format for metadata-action
           LABELS_JSON=$(yq -o=json '.labels' ${{ inputs.config-file }})
-          echo "labels=$LABELS_JSON" >> $GITHUB_OUTPUT
+          echo "labels<<EOF" >> $GITHUB_OUTPUT
+          echo "$LABELS_JSON" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
         fi
 
     - name: Docker Metadata
@@ -88,6 +87,6 @@ runs:
         context: ${{ steps.read-config.outputs.context }}
         file: ${{ steps.read-config.outputs.dockerfile }}
         platforms: ${{ steps.read-config.outputs.platforms }}
-        push: ${{ inputs.push }}
+        push: ${{ steps.read-config.outputs.push }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}

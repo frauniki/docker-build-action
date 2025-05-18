@@ -7,6 +7,10 @@ platforms: linux/amd64,linux/arm64
 
 image: ghcr.io/username/image-name
 
+push: true
+
+registry: ghcr.io
+
 tags:
   type: ref
   event: branch
