@@ -1,0 +1,20 @@
+
+context: .
+
+dockerfile: Dockerfile
+
+platforms: linux/amd64,linux/arm64
+
+image: ghcr.io/username/image-name
+
+tags:
+  type: ref
+  event: branch
+  
+flavor:
+  latest: auto
+  
+labels:
+  org.opencontainers.image.title: My Image
+  org.opencontainers.image.description: My Docker Image
+  org.opencontainers.image.vendor: My Company

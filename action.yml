@@ -1,0 +1,90 @@
+name: 'Docker Build Action'
+description: 'GitHub Action to build Docker images based on docker-build.yaml configuration'
+author: 'frauniki'
+branding:
+  icon: 'package'
+  color: 'blue'
+
+inputs:
+  config-file:
+    description: 'Path to the docker-build.yaml configuration file'
+    required: false
+    default: 'docker-build.yaml'
+  push:
+    description: 'Whether to push the Docker image to the registry'
+    required: false
+    default: 'false'
+  registry:
+    description: 'Docker registry to push to'
+    required: false
+    default: 'ghcr.io'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Read docker-build.yaml
+      id: read-config
+      shell: bash
+      run: |
+        if [ ! -f "${{ inputs.config-file }}" ]; then
+          echo "::error::Configuration file ${{ inputs.config-file }} not found"
+          exit 1
+        fi
+        
+        # Extract values from docker-build.yaml
+        CONTEXT=$(yq -r '.context // "."' ${{ inputs.config-file }})
+        DOCKERFILE=$(yq -r '.dockerfile // "Dockerfile"' ${{ inputs.config-file }})
+        PLATFORMS=$(yq -r '.platforms // "linux/amd64"' ${{ inputs.config-file }})
+        IMAGE_NAME=$(yq -r '.image // ""' ${{ inputs.config-file }})
+        
+        if [ -z "$IMAGE_NAME" ]; then
+          echo "::error::Image name not specified in configuration file"
+          exit 1
+        fi
+        
+        # Set outputs
+        echo "context=$CONTEXT" >> $GITHUB_OUTPUT
+        echo "dockerfile=$DOCKERFILE" >> $GITHUB_OUTPUT
+        echo "platforms=$PLATFORMS" >> $GITHUB_OUTPUT
+        echo "image=$IMAGE_NAME" >> $GITHUB_OUTPUT
+        
+        # Extract metadata configuration
+        TAGS=$(yq -r '.tags // ""' ${{ inputs.config-file }})
+        if [ ! -z "$TAGS" ]; then
+          echo "tags=$TAGS" >> $GITHUB_OUTPUT
+        fi
+        
+        FLAVOR=$(yq -r '.flavor // ""' ${{ inputs.config-file }})
+        if [ ! -z "$FLAVOR" ]; then
+          echo "flavor=$FLAVOR" >> $GITHUB_OUTPUT
+        fi
+        
+        LABELS=$(yq -r '.labels // ""' ${{ inputs.config-file }})
+        if [ ! -z "$LABELS" ]; then
+          echo "labels=$LABELS" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Docker Metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ steps.read-config.outputs.image }}
+        tags: ${{ steps.read-config.outputs.tags }}
+        flavor: ${{ steps.read-config.outputs.flavor }}
+        labels: ${{ steps.read-config.outputs.labels }}
+
+    - name: Build and push
+      uses: docker/build-push-action@v5
+      with:
+        context: ${{ steps.read-config.outputs.context }}
+        file: ${{ steps.read-config.outputs.dockerfile }}
+        platforms: ${{ steps.read-config.outputs.platforms }}
+        push: ${{ inputs.push }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
