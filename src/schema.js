@@ -20,6 +20,19 @@ const buildSchema = {
             }
           },
           additionalProperties: true
+        },
+        {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              type: { 
+                type: 'string',
+                enum: ['ref', 'schedule', 'semver', 'match', 'edge', 'raw']
+              }
+            },
+            additionalProperties: true
+          }
         }
       ]
     },
@@ -74,6 +87,19 @@ const legacyFormatSchema = {
             }
           },
           additionalProperties: true
+        },
+        {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              type: { 
+                type: 'string',
+                enum: ['ref', 'schedule', 'semver', 'match', 'edge', 'raw']
+              }
+            },
+            additionalProperties: true
+          }
         }
       ]
     },

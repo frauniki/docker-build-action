@@ -8,8 +8,12 @@ builds:
     push: true
     registry: ghcr.io
     tags:
-      type: ref
-      event: branch
+      - type: ref
+        event: branch
+      - type: semver
+        pattern: "{{version}}"
+      - type: raw
+        value: latest
     flavor:
       latest: auto
     labels:
@@ -25,8 +29,8 @@ builds:
     push: false
     registry: ghcr.io
     tags:
-      type: raw
-      value: latest
+      - type: raw
+        value: latest
     flavor:
       latest: auto
     labels:

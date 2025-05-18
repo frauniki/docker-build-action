@@ -177,4 +177,44 @@ describe('Configuration Validation', () => {
     expect(result.valid).toBe(true);
     expect(result.errors).toHaveLength(0);
   });
+  
+  test('Valid configuration with tags as array should pass validation', () => {
+    const config = {
+      builds: [
+        {
+          name: 'test-image',
+          context: './test',
+          dockerfile: 'Dockerfile',
+          platforms: 'linux/amd64',
+          image: 'ghcr.io/frauniki/docker-build-action-test',
+          push: false,
+          registry: 'ghcr.io',
+          tags: [
+            {
+              type: 'ref',
+              event: 'branch'
+            },
+            {
+              type: 'semver',
+              pattern: '{{version}}'
+            },
+            {
+              type: 'raw',
+              value: 'latest'
+            }
+          ],
+          flavor: {
+            latest: 'auto'
+          },
+          labels: {
+            'org.opencontainers.image.title': 'Test Image'
+          }
+        }
+      ]
+    };
+    
+    const result = validateConfig(config);
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
 });
