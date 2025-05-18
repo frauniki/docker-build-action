@@ -44,7 +44,7 @@ runs:
 
     - name: Build and push (Legacy)
       if: steps.parse-config.outputs.has_builds == 'false'
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@v6
       with:
         context: ${{ steps.parse-config.outputs.context }}
         file: ${{ steps.parse-config.outputs.context }}/${{ steps.parse-config.outputs.dockerfile }}
