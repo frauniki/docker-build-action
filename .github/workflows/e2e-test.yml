@@ -6,6 +6,7 @@ on:
   pull_request:
     branches: [ '**' ]
   workflow_dispatch:
+  # Adding a comment to trigger workflow
 
 jobs:
   test:
