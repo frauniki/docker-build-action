@@ -1,6 +1,7 @@
 const fs = require('fs');
 const yaml = require('js-yaml');
 const core = require('@actions/core');
+const { validateAndLogErrors } = require('./validate-config');
 
 /**
  * Parse the docker-build.yaml configuration file
@@ -15,6 +16,10 @@ function parseConfig(configFile) {
   
   const configContent = fs.readFileSync(configFile, 'utf8');
   const config = yaml.load(configContent);
+  
+  if (!validateAndLogErrors(config)) {
+    return null;
+  }
   
   let builds = [];
   
