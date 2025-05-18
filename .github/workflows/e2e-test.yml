@@ -47,3 +47,4 @@ jobs:
           docker run --rm ghcr.io/frauniki/docker-build-action-test
           
           echo "E2E test completed successfully"
+# Trigger workflow run for list format changes
