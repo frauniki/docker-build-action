@@ -1,0 +1,13 @@
+{
+  "name": "docker-build-action",
+  "version": "1.0.0",
+  "description": "GitHub Action to build Docker images based on docker-build.yaml configuration",
+  "main": "index.js",
+  "dependencies": {
+    "@actions/core": "^1.10.1",
+    "@actions/exec": "^1.1.1",
+    "js-yaml": "^4.1.0"
+  },
+  "author": "frauniki",
+  "license": "MIT"
+}

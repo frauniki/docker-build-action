@@ -39,13 +39,51 @@ jobs:
       - name: Build Docker image
         uses: frauniki/docker-build-action@main
         with:
-          push: true
           config-file: docker-build.yaml
 ```
 
 ## Configuration
 
-Create a `docker-build.yaml` file in the root of your repository with the following structure:
+Create a `docker-build.yaml` file in the root of your repository. You can define multiple builds using the list format or use the legacy format for a single build.
+
+### Multiple Builds (List Format)
+
+```yaml
+builds:
+  - name: app                                # Name of the build (optional, default: "build-{index}")
+    context: .                               # Docker build context (default: ".")
+    dockerfile: Dockerfile                   # Path to Dockerfile (default: "Dockerfile")
+    platforms: linux/amd64,linux/arm64       # Platforms to build for (default: "linux/amd64")
+    image: ghcr.io/username/app              # Image name (required)
+    push: true                               # Whether to push the image (default: false)
+    registry: ghcr.io                        # Docker registry to push to (default: "ghcr.io")
+    tags:                                    # Tags configuration (same format as docker/metadata-action)
+      type: ref
+      event: branch
+    flavor:                                  # Flavor configuration (same format as docker/metadata-action)
+      latest: auto
+    labels:                                  # Labels configuration (same format as docker/metadata-action)
+      org.opencontainers.image.title: App Image
+      org.opencontainers.image.description: My App Docker Image
+      
+  - name: worker
+    context: ./worker
+    dockerfile: Dockerfile.worker
+    platforms: linux/amd64
+    image: ghcr.io/username/worker
+    push: false
+    registry: ghcr.io
+    tags:
+      type: raw
+      value: latest
+    flavor:
+      latest: auto
+    labels:
+      org.opencontainers.image.title: Worker Image
+      org.opencontainers.image.description: My Worker Docker Image
+```
+
+### Single Build (Legacy Format)
 
 ```yaml
 # Docker build context (default: ".")
@@ -59,6 +97,12 @@ platforms: linux/amd64,linux/arm64
 
 # Image name (required)
 image: ghcr.io/username/image-name
+
+# Whether to push the image to the registry (default: "false")
+push: true
+
+# Docker registry to push to (default: "ghcr.io")
+registry: ghcr.io
 
 # Tags configuration (same format as docker/metadata-action)
 tags:
@@ -80,8 +124,6 @@ labels:
 | Name | Description | Required | Default |
 |------|-------------|----------|---------|
 | `config-file` | Path to the docker-build.yaml configuration file | No | `docker-build.yaml` |
-| `push` | Whether to push the Docker image to the registry | No | `false` |
-| `registry` | Docker registry to push to | No | `ghcr.io` |
 
 ## Example Configuration
 
@@ -92,14 +134,10 @@ context: .
 dockerfile: Dockerfile
 platforms: linux/amd64,linux/arm64
 image: ghcr.io/username/image-name
-tags:
-  type: raw
-  value: latest
-  enable: true
-flavor:
-  latest: auto
-  prefix: ''
-  suffix: ''
+push: true
+registry: ghcr.io
+tags: type=raw,value=latest
+flavor: latest=auto
 labels:
   org.opencontainers.image.title: My Image
   org.opencontainers.image.description: My Docker Image
