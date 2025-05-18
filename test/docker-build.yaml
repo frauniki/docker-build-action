@@ -1,0 +1,24 @@
+
+context: ./test
+
+dockerfile: Dockerfile
+
+platforms: linux/amd64
+
+image: ghcr.io/frauniki/docker-build-action-test
+
+tags:
+  type: raw
+  value: latest
+  enable: true
+
+flavor:
+  latest: auto
+  prefix: ''
+  suffix: ''
+
+labels:
+  org.opencontainers.image.title: Test Image
+  org.opencontainers.image.description: E2E Test for Docker Build Action
+  org.opencontainers.image.vendor: frauniki
+  org.opencontainers.image.source: https://github.com/frauniki/docker-build-action
