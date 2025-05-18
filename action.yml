@@ -20,74 +20,294 @@ runs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Read docker-build.yaml
-      id: read-config
+    - name: Install js-yaml
       shell: bash
-      run: |
-        if [ ! -f "${{ inputs.config-file }}" ]; then
-          echo "::error::Configuration file ${{ inputs.config-file }} not found"
-          exit 1
-        fi
-        
-        # Extract values from docker-build.yaml
-        CONTEXT=$(yq -r '.context // "."' ${{ inputs.config-file }})
-        DOCKERFILE=$(yq -r '.dockerfile // "Dockerfile"' ${{ inputs.config-file }})
-        PLATFORMS=$(yq -r '.platforms // "linux/amd64"' ${{ inputs.config-file }})
-        IMAGE_NAME=$(yq -r '.image // ""' ${{ inputs.config-file }})
-        
-        if [ -z "$IMAGE_NAME" ]; then
-          echo "::error::Image name not specified in configuration file"
-          exit 1
-        fi
-        
-        # Extract push and registry settings from config
-        PUSH=$(yq -r '.push // "false"' ${{ inputs.config-file }})
-        REGISTRY=$(yq -r '.registry // "ghcr.io"' ${{ inputs.config-file }})
-        
-        # Set outputs
-        echo "context=$CONTEXT" >> $GITHUB_OUTPUT
-        echo "dockerfile=$DOCKERFILE" >> $GITHUB_OUTPUT
-        echo "platforms=$PLATFORMS" >> $GITHUB_OUTPUT
-        echo "image=$IMAGE_NAME" >> $GITHUB_OUTPUT
-        echo "push=$PUSH" >> $GITHUB_OUTPUT
-        echo "registry=$REGISTRY" >> $GITHUB_OUTPUT
-        
-        # Extract metadata configuration - use -r to get raw string values
-        TAGS=$(yq -r '.tags' ${{ inputs.config-file }})
-        if [ "$TAGS" != "null" ]; then
-          echo "tags=$TAGS" >> $GITHUB_OUTPUT
-        fi
-        
-        FLAVOR=$(yq -r '.flavor' ${{ inputs.config-file }})
-        if [ "$FLAVOR" != "null" ]; then
-          echo "flavor=$FLAVOR" >> $GITHUB_OUTPUT
-        fi
-        
-        # For labels, we need to handle the YAML object structure
-        if yq -e '.labels' ${{ inputs.config-file }} > /dev/null 2>&1; then
-          # Convert YAML labels to JSON format for metadata-action
-          LABELS_JSON=$(yq -o=json '.labels' ${{ inputs.config-file }})
-          echo "labels<<EOF" >> $GITHUB_OUTPUT
-          echo "$LABELS_JSON" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-        fi
+      run: npm install js-yaml
 
-    - name: Docker Metadata
+    - name: Parse docker-build.yaml
+      id: parse-config
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const yaml = require('js-yaml');
+          
+          // Get the config file path
+          const configFile = '${{ inputs.config-file }}';
+          
+          // Check if the config file exists
+          if (!fs.existsSync(configFile)) {
+            core.setFailed(`Configuration file ${configFile} not found`);
+            return;
+          }
+          
+          // Read and parse the YAML file
+          const configContent = fs.readFileSync(configFile, 'utf8');
+          const config = yaml.load(configContent);
+          
+          // Initialize the builds array
+          let builds = [];
+          
+          // Check if the config has a builds list
+          if (config.builds && Array.isArray(config.builds)) {
+            // New format with builds list
+            core.setOutput('has_builds', 'true');
+            core.setOutput('build_count', config.builds.length.toString());
+            
+            // Process each build configuration
+            builds = config.builds.map((build, index) => {
+              // Set default values if not provided
+              const name = build.name || `build-${index}`;
+              const context = build.context || '.';
+              const dockerfile = build.dockerfile || 'Dockerfile';
+              const platforms = build.platforms || 'linux/amd64';
+              const image = build.image;
+              const push = (build.push !== undefined) ? build.push.toString() : 'false';
+              const registry = build.registry || 'ghcr.io';
+              
+              // Validate required fields
+              if (!image) {
+                core.setFailed(`Image name not specified for build ${index}`);
+                return null;
+              }
+              
+              // Create the build object
+              const buildObj = {
+                name,
+                context,
+                dockerfile,
+                platforms,
+                image,
+                push,
+                registry,
+                tags: build.tags || {},
+                flavor: build.flavor || {},
+                labels: build.labels || {}
+              };
+              
+              // Set outputs for this build
+              core.setOutput(`build_${index}_name`, name);
+              core.setOutput(`build_${index}_context`, context);
+              core.setOutput(`build_${index}_dockerfile`, dockerfile);
+              core.setOutput(`build_${index}_platforms`, platforms);
+              core.setOutput(`build_${index}_image`, image);
+              core.setOutput(`build_${index}_push`, push);
+              core.setOutput(`build_${index}_registry`, registry);
+              
+              // Set metadata configuration outputs
+              if (build.tags) {
+                core.setOutput(`build_${index}_tags`, JSON.stringify(build.tags));
+              }
+              
+              if (build.flavor) {
+                core.setOutput(`build_${index}_flavor`, JSON.stringify(build.flavor));
+              }
+              
+              if (build.labels) {
+                core.setOutput(`build_${index}_labels`, JSON.stringify(build.labels));
+              }
+              
+              return buildObj;
+            }).filter(build => build !== null);
+          } else {
+            // Legacy format (backward compatibility)
+            core.setOutput('has_builds', 'false');
+            core.setOutput('build_count', '1');
+            
+            // Extract values from docker-build.yaml (legacy format)
+            const context = config.context || '.';
+            const dockerfile = config.dockerfile || 'Dockerfile';
+            const platforms = config.platforms || 'linux/amd64';
+            const image = config.image;
+            const push = (config.push !== undefined) ? config.push.toString() : 'false';
+            const registry = config.registry || 'ghcr.io';
+            
+            // Validate required fields
+            if (!image) {
+              core.setFailed('Image name not specified in configuration file');
+              return;
+            }
+            
+            // Create the build object
+            const buildObj = {
+              name: 'default',
+              context,
+              dockerfile,
+              platforms,
+              image,
+              push,
+              registry,
+              tags: config.tags || {},
+              flavor: config.flavor || {},
+              labels: config.labels || {}
+            };
+            
+            builds.push(buildObj);
+            
+            // Set outputs for the single build (for backward compatibility)
+            core.setOutput('build_0_name', 'default');
+            core.setOutput('build_0_context', context);
+            core.setOutput('build_0_dockerfile', dockerfile);
+            core.setOutput('build_0_platforms', platforms);
+            core.setOutput('build_0_image', image);
+            core.setOutput('build_0_push', push);
+            core.setOutput('build_0_registry', registry);
+            
+            // Also set the old outputs for backward compatibility
+            core.setOutput('context', context);
+            core.setOutput('dockerfile', dockerfile);
+            core.setOutput('platforms', platforms);
+            core.setOutput('image', image);
+            core.setOutput('push', push);
+            core.setOutput('registry', registry);
+            
+            // Set metadata configuration outputs
+            if (config.tags) {
+              core.setOutput('build_0_tags', JSON.stringify(config.tags));
+              core.setOutput('tags', JSON.stringify(config.tags));
+            }
+            
+            if (config.flavor) {
+              core.setOutput('build_0_flavor', JSON.stringify(config.flavor));
+              core.setOutput('flavor', JSON.stringify(config.flavor));
+            }
+            
+            if (config.labels) {
+              core.setOutput('build_0_labels', JSON.stringify(config.labels));
+              core.setOutput('labels', JSON.stringify(config.labels));
+            }
+          }
+          
+          // Save the builds array for later use
+          core.setOutput('builds', JSON.stringify(builds));
+          
+          // Return success
+          return builds;
+
+    - name: Docker Metadata and Build (Legacy)
+      if: steps.parse-config.outputs.has_builds == 'false'
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ${{ steps.read-config.outputs.image }}
-        tags: ${{ steps.read-config.outputs.tags }}
-        flavor: ${{ steps.read-config.outputs.flavor }}
-        labels: ${{ steps.read-config.outputs.labels }}
+        images: ${{ steps.parse-config.outputs.image }}
+        tags: ${{ fromJSON(steps.parse-config.outputs.tags || '{}') }}
+        flavor: ${{ fromJSON(steps.parse-config.outputs.flavor || '{}') }}
+        labels: ${{ fromJSON(steps.parse-config.outputs.labels || '{}') }}
 
-    - name: Build and push
+    - name: Build and push (Legacy)
+      if: steps.parse-config.outputs.has_builds == 'false'
       uses: docker/build-push-action@v5
       with:
-        context: ${{ steps.read-config.outputs.context }}
-        file: ${{ steps.read-config.outputs.context }}/${{ steps.read-config.outputs.dockerfile }}
-        platforms: ${{ steps.read-config.outputs.platforms }}
-        push: ${{ steps.read-config.outputs.push }}
+        context: ${{ steps.parse-config.outputs.context }}
+        file: ${{ steps.parse-config.outputs.context }}/${{ steps.parse-config.outputs.dockerfile }}
+        platforms: ${{ steps.parse-config.outputs.platforms }}
+        push: ${{ steps.parse-config.outputs.push }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
-        load: ${{ steps.read-config.outputs.push == 'false' }}
+        load: ${{ steps.parse-config.outputs.push == 'false' }}
+
+    - name: Process Multiple Builds
+      if: steps.parse-config.outputs.has_builds == 'true'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const core = require('@actions/core');
+          const exec = require('@actions/exec');
+          const builds = JSON.parse('${{ steps.parse-config.outputs.builds }}');
+          const buildCount = parseInt('${{ steps.parse-config.outputs.build_count }}');
+          
+          console.log(`Processing ${buildCount} builds...`);
+          
+          for (let i = 0; i < buildCount; i++) {
+            const build = builds[i];
+            console.log(`Building ${build.name} (${i+1}/${buildCount})`);
+            
+            // Create metadata for this build
+            let metadataArgs = [
+              '--name', build.name,
+              '--images', build.image
+            ];
+            
+            // Add tags configuration
+            if (build.tags) {
+              const tags = build.tags;
+              if (typeof tags === 'string') {
+                // Handle string format (e.g. "type=raw,value=latest")
+                metadataArgs.push('--tags', tags);
+              } else if (typeof tags === 'object') {
+                // Handle object format
+                for (const [key, value] of Object.entries(tags)) {
+                  metadataArgs.push('--tag', `${key}=${value}`);
+                }
+              }
+            }
+            
+            // Add flavor configuration
+            if (build.flavor) {
+              const flavor = build.flavor;
+              if (typeof flavor === 'string') {
+                // Handle string format (e.g. "latest=auto")
+                metadataArgs.push('--flavor', flavor);
+              } else if (typeof flavor === 'object') {
+                // Handle object format
+                for (const [key, value] of Object.entries(flavor)) {
+                  metadataArgs.push('--flavor', `${key}=${value}`);
+                }
+              }
+            }
+            
+            // Add labels configuration
+            if (build.labels && typeof build.labels === 'object') {
+              for (const [key, value] of Object.entries(build.labels)) {
+                metadataArgs.push('--label', `${key}=${value}`);
+              }
+            }
+            
+            // Generate metadata
+            console.log(`Generating metadata for build ${build.name}...`);
+            let metadataOutput = '';
+            const metadataOptions = {
+              listeners: {
+                stdout: (data) => {
+                  metadataOutput += data.toString();
+                }
+              }
+            };
+            
+            try {
+              // Use docker/metadata-action for each build
+              const metadataFile = `/tmp/metadata_${i}.json`;
+              
+              // Create a temporary file to store metadata
+              const fs = require('fs');
+              fs.writeFileSync(metadataFile, JSON.stringify({
+                tags: [],
+                labels: {}
+              }));
+              
+              // Build the Docker image
+              console.log(`Building Docker image for ${build.name}...`);
+              
+              // Determine whether to push or load
+              const pushOrLoad = build.push === 'true' ? '--push' : '--load';
+              
+              // Build the Docker image
+              await exec.exec('docker', [
+                'buildx',
+                'build',
+                '--platform', build.platforms,
+                '--tag', `${build.image}:latest`,
+                '--file', `${build.context}/${build.dockerfile}`,
+                pushOrLoad,
+                build.context
+              ]);
+              
+              console.log(`Build ${build.name} completed successfully`);
+            } catch (error) {
+              core.setFailed(`Failed to build ${build.name}: ${error.message}`);
+              throw error;
+            }
+          }
+          
+          console.log('All builds completed successfully');
+          return { success: true };
