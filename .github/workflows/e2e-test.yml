@@ -28,7 +28,6 @@ jobs:
       - name: Test Docker Build Action
         uses: ./
         with:
-          push: false
           config-file: test/docker-build.yaml
 
       - name: Verify Docker image was built

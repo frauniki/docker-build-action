@@ -85,8 +85,9 @@ runs:
       uses: docker/build-push-action@v5
       with:
         context: ${{ steps.read-config.outputs.context }}
-        file: ${{ steps.read-config.outputs.dockerfile }}
+        file: ${{ steps.read-config.outputs.context }}/${{ steps.read-config.outputs.dockerfile }}
         platforms: ${{ steps.read-config.outputs.platforms }}
         push: ${{ steps.read-config.outputs.push }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
+        load: ${{ steps.read-config.outputs.push == 'false' }}
