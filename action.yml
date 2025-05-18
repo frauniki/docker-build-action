@@ -54,20 +54,23 @@ runs:
         echo "platforms=$PLATFORMS" >> $GITHUB_OUTPUT
         echo "image=$IMAGE_NAME" >> $GITHUB_OUTPUT
         
-        # Extract metadata configuration
-        TAGS=$(yq -r '.tags // ""' ${{ inputs.config-file }})
-        if [ ! -z "$TAGS" ]; then
+        # Extract metadata configuration - use -r to get raw string values
+        TAGS=$(yq -r '.tags' ${{ inputs.config-file }})
+        if [ "$TAGS" != "null" ]; then
           echo "tags=$TAGS" >> $GITHUB_OUTPUT
         fi
         
-        FLAVOR=$(yq -r '.flavor // ""' ${{ inputs.config-file }})
-        if [ ! -z "$FLAVOR" ]; then
+        FLAVOR=$(yq -r '.flavor' ${{ inputs.config-file }})
+        if [ "$FLAVOR" != "null" ]; then
           echo "flavor=$FLAVOR" >> $GITHUB_OUTPUT
         fi
         
-        LABELS=$(yq -r '.labels // ""' ${{ inputs.config-file }})
-        if [ ! -z "$LABELS" ]; then
-          echo "labels=$LABELS" >> $GITHUB_OUTPUT
+        # For labels, we need to handle the YAML object structure
+        LABELS=$(yq -r '.labels' ${{ inputs.config-file }})
+        if [ "$LABELS" != "null" ]; then
+          # Convert YAML labels to JSON format for metadata-action
+          LABELS_JSON=$(yq -o=json '.labels' ${{ inputs.config-file }})
+          echo "labels=$LABELS_JSON" >> $GITHUB_OUTPUT
         fi
 
     - name: Docker Metadata

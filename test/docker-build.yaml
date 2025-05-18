@@ -7,15 +7,9 @@ platforms: linux/amd64
 
 image: ghcr.io/frauniki/docker-build-action-test
 
-tags:
-  type: raw
-  value: latest
-  enable: true
+tags: type=raw,value=latest
 
-flavor:
-  latest: auto
-  prefix: ''
-  suffix: ''
+flavor: latest=auto
 
 labels:
   org.opencontainers.image.title: Test Image
