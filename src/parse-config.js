@@ -41,6 +41,12 @@ function parseConfig(configFile) {
         return null;
       }
       
+      let tags = build.tags || {};
+      
+      if (Array.isArray(tags)) {
+        core.info(`Build ${index} has ${tags.length} tag definitions`);
+      }
+      
       const buildObj = {
         name,
         context,
@@ -49,7 +55,7 @@ function parseConfig(configFile) {
         image,
         push,
         registry,
-        tags: build.tags || {},
+        tags,
         flavor: build.flavor || {},
         labels: build.labels || {}
       };

@@ -57,9 +57,13 @@ builds:
     image: ghcr.io/username/app              # Image name (required)
     push: true                               # Whether to push the image (default: false)
     registry: ghcr.io                        # Docker registry to push to (default: "ghcr.io")
-    tags:                                    # Tags configuration (same format as docker/metadata-action)
-      type: ref
-      event: branch
+    tags:                                    # Tags configuration (supports list format)
+      - type: ref
+        event: branch
+      - type: semver
+        pattern: "{{version}}"
+      - type: raw
+        value: latest
     flavor:                                  # Flavor configuration (same format as docker/metadata-action)
       latest: auto
     labels:                                  # Labels configuration (same format as docker/metadata-action)
@@ -74,8 +78,8 @@ builds:
     push: false
     registry: ghcr.io
     tags:
-      type: raw
-      value: latest
+      - type: raw
+        value: latest
     flavor:
       latest: auto
     labels:
@@ -104,10 +108,12 @@ push: true
 # Docker registry to push to (default: "ghcr.io")
 registry: ghcr.io
 
-# Tags configuration (same format as docker/metadata-action)
+# Tags configuration (supports list format)
 tags:
-  type: ref
-  event: branch
+  - type: ref
+    event: branch
+  - type: semver
+    pattern: "{{version}}"
   
 # Flavor configuration (same format as docker/metadata-action)
 flavor:
@@ -124,6 +130,24 @@ labels:
 | Name | Description | Required | Default |
 |------|-------------|----------|---------|
 | `config-file` | Path to the docker-build.yaml configuration file | No | `docker-build.yaml` |
+
+## Tags List Format
+
+You can now specify multiple tag definitions using a list format:
+
+```yaml
+tags:
+  - type: ref
+    event: branch
+  - type: semver
+    pattern: "{{version}}"
+  - type: raw
+    value: latest
+```
+
+This allows you to generate multiple Docker image tags from a single build configuration. Each tag definition is processed separately and passed to docker/metadata-action.
+
+The tags list format is supported in both the multiple builds format and the legacy single build format.
 
 ## Example Configuration
 

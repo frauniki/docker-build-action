@@ -25,6 +25,15 @@ async function processBuilds(builds) {
       const tags = build.tags;
       if (typeof tags === 'string') {
         metadataArgs.push('--tags', tags);
+      } else if (Array.isArray(tags)) {
+        console.log(`Processing ${tags.length} tag definitions for ${build.name}`);
+        tags.forEach(tag => {
+          if (tag && typeof tag === 'object') {
+            for (const [key, value] of Object.entries(tag)) {
+              metadataArgs.push('--tag', `${key}=${value}`);
+            }
+          }
+        });
       } else if (typeof tags === 'object') {
         for (const [key, value] of Object.entries(tags)) {
           metadataArgs.push('--tag', `${key}=${value}`);
