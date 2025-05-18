@@ -48,3 +48,4 @@ jobs:
           
           echo "E2E test completed successfully"
 # Trigger workflow run for list format changes
+# Re-run workflow after fixing core declaration
