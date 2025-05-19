@@ -82,66 +82,6 @@ function parseConfig(configFile) {
       
       return buildObj;
     }).filter(build => build !== null);
-  } else {
-    core.setOutput('has_builds', 'false');
-    core.setOutput('build_count', '1');
-    
-    const context = config.context || '.';
-    const dockerfile = config.dockerfile || 'Dockerfile';
-    const platforms = config.platforms || 'linux/amd64';
-    const image = config.image;
-    const push = (config.push !== undefined) ? config.push.toString() : 'false';
-    const registry = config.registry || 'ghcr.io';
-    
-    if (!image) {
-      core.setFailed('Image name not specified in configuration file');
-      return null;
-    }
-    
-    const buildObj = {
-      name: 'default',
-      context,
-      dockerfile,
-      platforms,
-      image,
-      push,
-      registry,
-      tags: config.tags || {},
-      flavor: config.flavor || {},
-      labels: config.labels || {}
-    };
-    
-    builds.push(buildObj);
-    
-    core.setOutput('build_0_name', 'default');
-    core.setOutput('build_0_context', context);
-    core.setOutput('build_0_dockerfile', dockerfile);
-    core.setOutput('build_0_platforms', platforms);
-    core.setOutput('build_0_image', image);
-    core.setOutput('build_0_push', push);
-    core.setOutput('build_0_registry', registry);
-    
-    core.setOutput('context', context);
-    core.setOutput('dockerfile', dockerfile);
-    core.setOutput('platforms', platforms);
-    core.setOutput('image', image);
-    core.setOutput('push', push);
-    core.setOutput('registry', registry);
-    
-    if (config.tags) {
-      core.setOutput('build_0_tags', JSON.stringify(config.tags));
-      core.setOutput('tags', JSON.stringify(config.tags));
-    }
-    
-    if (config.flavor) {
-      core.setOutput('build_0_flavor', JSON.stringify(config.flavor));
-      core.setOutput('flavor', JSON.stringify(config.flavor));
-    }
-    
-    if (config.labels) {
-      core.setOutput('build_0_labels', JSON.stringify(config.labels));
-      core.setOutput('labels', JSON.stringify(config.labels));
-    }
   }
   
   core.setOutput('builds', JSON.stringify(builds));

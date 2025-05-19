@@ -34,30 +34,7 @@ describe('Configuration Validation', () => {
     expect(result.errors).toHaveLength(0);
   });
   
-  test('Valid legacy format configuration should pass validation', () => {
-    const config = {
-      context: './test',
-      dockerfile: 'Dockerfile',
-      platforms: 'linux/amd64',
-      image: 'ghcr.io/frauniki/docker-build-action-test',
-      push: false,
-      registry: 'ghcr.io',
-      tags: {
-        type: 'raw',
-        value: 'latest'
-      },
-      flavor: {
-        latest: 'auto'
-      },
-      labels: {
-        'org.opencontainers.image.title': 'Test Image'
-      }
-    };
-    
-    const result = validateConfig(config);
-    expect(result.valid).toBe(true);
-    expect(result.errors).toHaveLength(0);
-  });
+
   
   test('Invalid list format configuration should fail validation', () => {
     const config = {
@@ -79,20 +56,7 @@ describe('Configuration Validation', () => {
     expect(result.errors[0]).toContain('Missing required property');
   });
   
-  test('Invalid legacy format configuration should fail validation', () => {
-    const config = {
-      context: './test',
-      dockerfile: 'Dockerfile',
-      platforms: 'linux/amd64',
-      push: false,
-      registry: 'ghcr.io'
-    };
-    
-    const result = validateConfig(config);
-    expect(result.valid).toBe(false);
-    expect(result.errors.length).toBeGreaterThan(0);
-    expect(result.errors[0]).toContain('Missing required property');
-  });
+
   
   test('Invalid type in configuration should fail validation', () => {
     const config = {
