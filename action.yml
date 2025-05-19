@@ -46,10 +46,10 @@ runs:
       if: steps.parse-config.outputs.has_builds == 'false'
       uses: docker/build-push-action@v6
       with:
-        context: ${{ steps.parse-config.outputs.context }}
-        file: ${{ steps.parse-config.outputs.context }}/${{ steps.parse-config.outputs.dockerfile }}
-        platforms: ${{ steps.parse-config.outputs.platforms }}
-        push: ${{ steps.parse-config.outputs.push }}
+        context: ${{ steps.parse-config.outputs.context || '.' }}
+        file: ${{ steps.parse-config.outputs.context || '.' }}/${{ steps.parse-config.outputs.dockerfile || 'Dockerfile' }}
+        platforms: ${{ steps.parse-config.outputs.platforms || 'linux/amd64' }}
+        push: ${{ steps.parse-config.outputs.push || 'false' }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         load: ${{ steps.parse-config.outputs.push == 'false' }}

@@ -1,6 +1,7 @@
-const { validateConfig } = require('../src/validate-config');
-const fs = require('fs');
-const yaml = require('js-yaml');
+import { describe, test, expect } from 'vitest';
+import { validateConfig } from '../src/validate-config';
+import fs from 'fs';
+import yaml from 'js-yaml';
 
 describe('Configuration Validation', () => {
   test('Valid list format configuration should pass validation', () => {
@@ -160,8 +161,8 @@ describe('Configuration Validation', () => {
     expect(result.errors[0]).toContain('Unknown property');
   });
   
-  test('test/docker-build.yaml should pass validation', () => {
-    const configContent = fs.readFileSync('./test/docker-build.yaml', 'utf8');
+  test('tests/fixtures/docker-build.yaml should pass validation', () => {
+    const configContent = fs.readFileSync('./tests/fixtures/docker-build.yaml', 'utf8');
     const config = yaml.load(configContent);
     
     const result = validateConfig(config);
