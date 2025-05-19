@@ -32,14 +32,7 @@ runs:
           const parseConfig = require('./src/parse-config.js');
           return parseConfig('${{ inputs.config-file }}');
 
-    - name: Docker Metadata and Build
-      id: meta
-      uses: docker/metadata-action@v5
-      with:
-        images: ${{ steps.parse-config.outputs.image }}
-        tags: ${{ fromJSON(steps.parse-config.outputs.tags || '{}') }}
-        flavor: ${{ fromJSON(steps.parse-config.outputs.flavor || '{}') }}
-        labels: ${{ fromJSON(steps.parse-config.outputs.labels || '{}') }}
+    # Docker Metadata and Build step removed as it was only used for Legacy Format
 
 
 
