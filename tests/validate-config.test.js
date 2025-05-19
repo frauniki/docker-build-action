@@ -122,7 +122,10 @@ describe("Configuration Validation", () => {
   });
 
   test("tests/fixtures/docker-build.yaml should pass validation", () => {
-    const configContent = fs.readFileSync("./tests/fixtures/docker-build.yaml", "utf8");
+    const configContent = fs.readFileSync(
+      "./tests/fixtures/docker-build.yaml",
+      "utf8",
+    );
     const config = yaml.load(configContent);
 
     const result = validateConfig(config);
@@ -131,7 +134,10 @@ describe("Configuration Validation", () => {
   });
 
   test("example/docker-build.yaml should pass validation", () => {
-    const configContent = fs.readFileSync("./example/docker-build.yaml", "utf8");
+    const configContent = fs.readFileSync(
+      "./example/docker-build.yaml",
+      "utf8",
+    );
     const config = yaml.load(configContent);
 
     const result = validateConfig(config);

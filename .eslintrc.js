@@ -12,7 +12,6 @@ module.exports = {
     "no-console": "off", // Allow console.log since it's used throughout the codebase
     "no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
     semi: ["error", "always"],
-    quotes: ["error", "single", { avoidEscape: true }],
   },
   overrides: [
     {

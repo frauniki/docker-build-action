@@ -23,7 +23,9 @@ async function processBuilds(builds) {
       if (typeof tags === "string") {
         metadataArgs.push("--tags", tags);
       } else if (Array.isArray(tags)) {
-        console.log(`Processing ${tags.length} tag definitions for ${build.name}`);
+        console.log(
+          `Processing ${tags.length} tag definitions for ${build.name}`,
+        );
         tags.forEach((tag) => {
           if (tag && typeof tag === "object") {
             for (const [key, value] of Object.entries(tag)) {
@@ -65,7 +67,7 @@ async function processBuilds(builds) {
         JSON.stringify({
           tags: [],
           labels: {},
-        })
+        }),
       );
 
       console.log(`Building Docker image for ${build.name}...`);
