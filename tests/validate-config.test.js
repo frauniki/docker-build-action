@@ -1,183 +1,185 @@
-import { describe, test, expect } from 'vitest';
-import { validateConfig } from '../src/validate-config';
-import fs from 'fs';
-import yaml from 'js-yaml';
+import { describe, test, expect } from "vitest";
+import { validateConfig } from "../src/validate-config";
+import fs from "fs";
+import yaml from "js-yaml";
 
-describe('Configuration Validation', () => {
-  test('Valid list format configuration should pass validation', () => {
+describe("Configuration Validation", () => {
+  test("Valid list format configuration should pass validation", () => {
     const config = {
       builds: [
         {
-          name: 'test-image',
-          context: './test',
-          dockerfile: 'Dockerfile',
-          platforms: 'linux/amd64',
-          image: 'ghcr.io/frauniki/docker-build-action-test',
+          name: "test-image",
+          context: "./test",
+          dockerfile: "Dockerfile",
+          platforms: "linux/amd64",
+          image: "ghcr.io/frauniki/docker-build-action-test",
           push: false,
-          registry: 'ghcr.io',
+          registry: "ghcr.io",
           tags: {
-            type: 'raw',
-            value: 'latest'
+            type: "raw",
+            value: "latest",
           },
           flavor: {
-            latest: 'auto'
+            latest: "auto",
           },
           labels: {
-            'org.opencontainers.image.title': 'Test Image'
-          }
-        }
-      ]
+            "org.opencontainers.image.title": "Test Image",
+          },
+        },
+      ],
     };
-    
+
     const result = validateConfig(config);
     expect(result.valid).toBe(true);
     expect(result.errors).toHaveLength(0);
   });
-  
 
-  
-  test('Invalid list format configuration should fail validation', () => {
+  test("Invalid list format configuration should fail validation", () => {
     const config = {
       builds: [
         {
-          name: 'test-image',
-          context: './test',
-          dockerfile: 'Dockerfile',
-          platforms: 'linux/amd64',
+          name: "test-image",
+          context: "./test",
+          dockerfile: "Dockerfile",
+          platforms: "linux/amd64",
           push: false,
-          registry: 'ghcr.io'
-        }
-      ]
+          registry: "ghcr.io",
+        },
+      ],
     };
-    
+
     const result = validateConfig(config);
     expect(result.valid).toBe(false);
     expect(result.errors.length).toBeGreaterThan(0);
-    expect(result.errors[0]).toContain('Missing required property');
+    expect(result.errors[0]).toContain("Missing required property");
   });
-  
 
-  
-  test('Invalid type in configuration should fail validation', () => {
+  test("Invalid type in configuration should fail validation", () => {
     const config = {
       builds: [
         {
-          name: 'test-image',
-          context: './test',
-          dockerfile: 'Dockerfile',
-          platforms: 'linux/amd64',
-          image: 'ghcr.io/frauniki/docker-build-action-test',
-          push: 'not-a-boolean', // Should be boolean or 'true'/'false' string
-          registry: 'ghcr.io'
-        }
-      ]
+          name: "test-image",
+          context: "./test",
+          dockerfile: "Dockerfile",
+          platforms: "linux/amd64",
+          image: "ghcr.io/frauniki/docker-build-action-test",
+          push: "not-a-boolean", // Should be boolean or 'true'/'false' string
+          registry: "ghcr.io",
+        },
+      ],
     };
-    
+
     const result = validateConfig(config);
     expect(result.valid).toBe(true); // This should pass because push can be a string
   });
-  
-  test('Invalid enum value in configuration should fail validation', () => {
+
+  test("Invalid enum value in configuration should fail validation", () => {
     const config = {
       builds: [
         {
-          name: 'test-image',
-          context: './test',
-          dockerfile: 'Dockerfile',
-          platforms: 'linux/amd64',
-          image: 'ghcr.io/frauniki/docker-build-action-test',
+          name: "test-image",
+          context: "./test",
+          dockerfile: "Dockerfile",
+          platforms: "linux/amd64",
+          image: "ghcr.io/frauniki/docker-build-action-test",
           push: false,
-          registry: 'ghcr.io',
+          registry: "ghcr.io",
           tags: {
-            type: 'invalid-type', // Should be one of the allowed types
-            value: 'latest'
-          }
-        }
-      ]
+            type: "invalid-type", // Should be one of the allowed types
+            value: "latest",
+          },
+        },
+      ],
     };
-    
+
     const result = validateConfig(config);
     expect(result.valid).toBe(false);
     expect(result.errors.length).toBeGreaterThan(0);
-    expect(result.errors[0]).toContain('Invalid type');
-    expect(result.errors[0]).toContain('tags');
+    expect(result.errors[0]).toContain("Invalid type");
+    expect(result.errors[0]).toContain("tags");
   });
-  
-  test('Unknown property in configuration should fail validation', () => {
+
+  test("Unknown property in configuration should fail validation", () => {
     const config = {
       builds: [
         {
-          name: 'test-image',
-          context: './test',
-          dockerfile: 'Dockerfile',
-          platforms: 'linux/amd64',
-          image: 'ghcr.io/frauniki/docker-build-action-test',
+          name: "test-image",
+          context: "./test",
+          dockerfile: "Dockerfile",
+          platforms: "linux/amd64",
+          image: "ghcr.io/frauniki/docker-build-action-test",
           push: false,
-          registry: 'ghcr.io',
-          unknown_property: 'value' // Unknown property
-        }
-      ]
+          registry: "ghcr.io",
+          unknown_property: "value", // Unknown property
+        },
+      ],
     };
-    
+
     const result = validateConfig(config);
     expect(result.valid).toBe(false);
     expect(result.errors.length).toBeGreaterThan(0);
-    expect(result.errors[0]).toContain('Unknown property');
+    expect(result.errors[0]).toContain("Unknown property");
   });
-  
-  test('tests/fixtures/docker-build.yaml should pass validation', () => {
-    const configContent = fs.readFileSync('./tests/fixtures/docker-build.yaml', 'utf8');
+
+  test("tests/fixtures/docker-build.yaml should pass validation", () => {
+    const configContent = fs.readFileSync(
+      "./tests/fixtures/docker-build.yaml",
+      "utf8",
+    );
     const config = yaml.load(configContent);
-    
+
     const result = validateConfig(config);
     expect(result.valid).toBe(true);
     expect(result.errors).toHaveLength(0);
   });
-  
-  test('example/docker-build.yaml should pass validation', () => {
-    const configContent = fs.readFileSync('./example/docker-build.yaml', 'utf8');
+
+  test("example/docker-build.yaml should pass validation", () => {
+    const configContent = fs.readFileSync(
+      "./example/docker-build.yaml",
+      "utf8",
+    );
     const config = yaml.load(configContent);
-    
+
     const result = validateConfig(config);
     expect(result.valid).toBe(true);
     expect(result.errors).toHaveLength(0);
   });
-  
-  test('Valid configuration with tags as array should pass validation', () => {
+
+  test("Valid configuration with tags as array should pass validation", () => {
     const config = {
       builds: [
         {
-          name: 'test-image',
-          context: './test',
-          dockerfile: 'Dockerfile',
-          platforms: 'linux/amd64',
-          image: 'ghcr.io/frauniki/docker-build-action-test',
+          name: "test-image",
+          context: "./test",
+          dockerfile: "Dockerfile",
+          platforms: "linux/amd64",
+          image: "ghcr.io/frauniki/docker-build-action-test",
           push: false,
-          registry: 'ghcr.io',
+          registry: "ghcr.io",
           tags: [
             {
-              type: 'ref',
-              event: 'branch'
+              type: "ref",
+              event: "branch",
             },
             {
-              type: 'semver',
-              pattern: '{{version}}'
+              type: "semver",
+              pattern: "{{version}}",
             },
             {
-              type: 'raw',
-              value: 'latest'
-            }
+              type: "raw",
+              value: "latest",
+            },
           ],
           flavor: {
-            latest: 'auto'
+            latest: "auto",
           },
           labels: {
-            'org.opencontainers.image.title': 'Test Image'
-          }
-        }
-      ]
+            "org.opencontainers.image.title": "Test Image",
+          },
+        },
+      ],
     };
-    
+
     const result = validateConfig(config);
     expect(result.valid).toBe(true);
     expect(result.errors).toHaveLength(0);

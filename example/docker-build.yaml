@@ -1,4 +1,3 @@
-
 builds:
   - name: app
     context: .
@@ -20,7 +19,7 @@ builds:
       org.opencontainers.image.title: App Image
       org.opencontainers.image.description: My App Docker Image
       org.opencontainers.image.vendor: My Company
-      
+
   - name: worker
     context: ./worker
     dockerfile: Dockerfile.worker
