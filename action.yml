@@ -47,7 +47,7 @@ runs:
       uses: docker/build-push-action@v6
       with:
         context: ${{ steps.parse-config.outputs.context }}
-        file: ${{ steps.parse-config.outputs.context }}/${{ steps.parse-config.outputs.dockerfile }}
+        file: ${{ steps.parse-config.outputs.dockerfile }}
         platforms: ${{ steps.parse-config.outputs.platforms }}
         push: ${{ steps.parse-config.outputs.push }}
         tags: ${{ steps.meta.outputs.tags }}
