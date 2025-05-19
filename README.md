@@ -61,7 +61,7 @@ builds:
       - type: ref
         event: branch
       - type: semver
-        pattern: '{{version}}'
+        pattern: "{{version}}"
       - type: raw
         value: latest
     flavor: # Flavor configuration (same format as docker/metadata-action)
@@ -113,7 +113,7 @@ tags:
   - type: ref
     event: branch
   - type: semver
-    pattern: '{{version}}'
+    pattern: "{{version}}"
 
 # Flavor configuration (same format as docker/metadata-action)
 flavor:
@@ -140,7 +140,7 @@ tags:
   - type: ref
     event: branch
   - type: semver
-    pattern: '{{version}}'
+    pattern: "{{version}}"
   - type: raw
     value: latest
 ```

@@ -10,7 +10,7 @@ builds:
       - type: ref
         event: branch
       - type: semver
-        pattern: '{{version}}'
+        pattern: "{{version}}"
       - type: raw
         value: latest
     flavor:

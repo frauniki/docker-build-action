@@ -1,6 +1,6 @@
-const core = require('@actions/core');
-const exec = require('@actions/exec');
-const fs = require('fs');
+const core = require("@actions/core");
+const exec = require("@actions/exec");
+const fs = require("fs");
 
 /**
  * Process multiple Docker builds
@@ -16,42 +16,42 @@ async function processBuilds(builds) {
     const build = builds[i];
     console.log(`Building ${build.name} (${i + 1}/${buildCount})`);
 
-    let metadataArgs = ['--name', build.name, '--images', build.image];
+    let metadataArgs = ["--name", build.name, "--images", build.image];
 
     if (build.tags) {
       const tags = build.tags;
-      if (typeof tags === 'string') {
-        metadataArgs.push('--tags', tags);
+      if (typeof tags === "string") {
+        metadataArgs.push("--tags", tags);
       } else if (Array.isArray(tags)) {
         console.log(`Processing ${tags.length} tag definitions for ${build.name}`);
         tags.forEach((tag) => {
-          if (tag && typeof tag === 'object') {
+          if (tag && typeof tag === "object") {
             for (const [key, value] of Object.entries(tag)) {
-              metadataArgs.push('--tag', `${key}=${value}`);
+              metadataArgs.push("--tag", `${key}=${value}`);
             }
           }
         });
-      } else if (typeof tags === 'object') {
+      } else if (typeof tags === "object") {
         for (const [key, value] of Object.entries(tags)) {
-          metadataArgs.push('--tag', `${key}=${value}`);
+          metadataArgs.push("--tag", `${key}=${value}`);
         }
       }
     }
 
     if (build.flavor) {
       const flavor = build.flavor;
-      if (typeof flavor === 'string') {
-        metadataArgs.push('--flavor', flavor);
-      } else if (typeof flavor === 'object') {
+      if (typeof flavor === "string") {
+        metadataArgs.push("--flavor", flavor);
+      } else if (typeof flavor === "object") {
         for (const [key, value] of Object.entries(flavor)) {
-          metadataArgs.push('--flavor', `${key}=${value}`);
+          metadataArgs.push("--flavor", `${key}=${value}`);
         }
       }
     }
 
-    if (build.labels && typeof build.labels === 'object') {
+    if (build.labels && typeof build.labels === "object") {
       for (const [key, value] of Object.entries(build.labels)) {
-        metadataArgs.push('--label', `${key}=${value}`);
+        metadataArgs.push("--label", `${key}=${value}`);
       }
     }
 
@@ -70,16 +70,16 @@ async function processBuilds(builds) {
 
       console.log(`Building Docker image for ${build.name}...`);
 
-      const pushOrLoad = build.push === 'true' ? '--push' : '--load';
+      const pushOrLoad = build.push === "true" ? "--push" : "--load";
 
-      await exec.exec('docker', [
-        'buildx',
-        'build',
-        '--platform',
+      await exec.exec("docker", [
+        "buildx",
+        "build",
+        "--platform",
         build.platforms,
-        '--tag',
+        "--tag",
         `${build.image}:latest`,
-        '--file',
+        "--file",
         `${build.context}/${build.dockerfile}`,
         pushOrLoad,
         build.context,
@@ -92,7 +92,7 @@ async function processBuilds(builds) {
     }
   }
 
-  console.log('All builds completed successfully');
+  console.log("All builds completed successfully");
   return { success: true };
 }
 

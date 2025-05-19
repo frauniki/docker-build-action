@@ -1,18 +1,18 @@
-name: 'Docker Build Action'
-description: 'GitHub Action to build Docker images based on docker-build.yaml configuration'
-author: 'frauniki'
+name: "Docker Build Action"
+description: "GitHub Action to build Docker images based on docker-build.yaml configuration"
+author: "frauniki"
 branding:
-  icon: 'package'
-  color: 'blue'
+  icon: "package"
+  color: "blue"
 
 inputs:
   config-file:
-    description: 'Path to the docker-build.yaml configuration file'
+    description: "Path to the docker-build.yaml configuration file"
     required: false
-    default: 'docker-build.yaml'
+    default: "docker-build.yaml"
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
     - name: Checkout
       uses: actions/checkout@v4

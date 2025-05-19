@@ -1,7 +1,7 @@
-const fs = require('fs');
-const yaml = require('js-yaml');
-const core = require('@actions/core');
-const { validateAndLogErrors } = require('./validate-config');
+const fs = require("fs");
+const yaml = require("js-yaml");
+const core = require("@actions/core");
+const { validateAndLogErrors } = require("./validate-config");
 
 /**
  * Parse the docker-build.yaml configuration file
@@ -14,7 +14,7 @@ function parseConfig(configFile) {
     return null;
   }
 
-  const configContent = fs.readFileSync(configFile, 'utf8');
+  const configContent = fs.readFileSync(configFile, "utf8");
   const config = yaml.load(configContent);
 
   if (!validateAndLogErrors(config)) {
@@ -24,18 +24,18 @@ function parseConfig(configFile) {
   let builds = [];
 
   if (config.builds && Array.isArray(config.builds)) {
-    core.setOutput('has_builds', 'true');
-    core.setOutput('build_count', config.builds.length.toString());
+    core.setOutput("has_builds", "true");
+    core.setOutput("build_count", config.builds.length.toString());
 
     builds = config.builds
       .map((build, index) => {
         const name = build.name || `build-${index}`;
-        const context = build.context || '.';
-        const dockerfile = build.dockerfile || 'Dockerfile';
-        const platforms = build.platforms || 'linux/amd64';
+        const context = build.context || ".";
+        const dockerfile = build.dockerfile || "Dockerfile";
+        const platforms = build.platforms || "linux/amd64";
         const image = build.image;
-        const push = build.push !== undefined ? build.push.toString() : 'false';
-        const registry = build.registry || 'ghcr.io';
+        const push = build.push !== undefined ? build.push.toString() : "false";
+        const registry = build.registry || "ghcr.io";
 
         if (!image) {
           core.setFailed(`Image name not specified for build ${index}`);
@@ -86,7 +86,7 @@ function parseConfig(configFile) {
       .filter((build) => build !== null);
   }
 
-  core.setOutput('builds', JSON.stringify(builds));
+  core.setOutput("builds", JSON.stringify(builds));
 
   return builds;
 }

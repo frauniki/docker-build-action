@@ -1,34 +1,34 @@
 const buildSchema = {
-  type: 'object',
+  type: "object",
   properties: {
-    name: { type: 'string' },
-    context: { type: 'string' },
-    dockerfile: { type: 'string' },
-    platforms: { type: 'string' },
-    image: { type: 'string' },
-    push: { oneOf: [{ type: 'boolean' }, { type: 'string' }] },
-    registry: { type: 'string' },
+    name: { type: "string" },
+    context: { type: "string" },
+    dockerfile: { type: "string" },
+    platforms: { type: "string" },
+    image: { type: "string" },
+    push: { oneOf: [{ type: "boolean" }, { type: "string" }] },
+    registry: { type: "string" },
     tags: {
       oneOf: [
-        { type: 'string' },
+        { type: "string" },
         {
-          type: 'object',
+          type: "object",
           properties: {
             type: {
-              type: 'string',
-              enum: ['ref', 'schedule', 'semver', 'match', 'edge', 'raw'],
+              type: "string",
+              enum: ["ref", "schedule", "semver", "match", "edge", "raw"],
             },
           },
           additionalProperties: true,
         },
         {
-          type: 'array',
+          type: "array",
           items: {
-            type: 'object',
+            type: "object",
             properties: {
               type: {
-                type: 'string',
-                enum: ['ref', 'schedule', 'semver', 'match', 'edge', 'raw'],
+                type: "string",
+                enum: ["ref", "schedule", "semver", "match", "edge", "raw"],
               },
             },
             additionalProperties: true,
@@ -38,31 +38,31 @@ const buildSchema = {
     },
     flavor: {
       oneOf: [
-        { type: 'string' },
+        { type: "string" },
         {
-          type: 'object',
+          type: "object",
           additionalProperties: true,
         },
       ],
     },
     labels: {
-      type: 'object',
-      additionalProperties: { type: 'string' },
+      type: "object",
+      additionalProperties: { type: "string" },
     },
   },
-  required: ['image'],
+  required: ["image"],
   additionalProperties: false,
 };
 
 const listFormatSchema = {
-  type: 'object',
+  type: "object",
   properties: {
     builds: {
-      type: 'array',
+      type: "array",
       items: buildSchema,
     },
   },
-  required: ['builds'],
+  required: ["builds"],
   additionalProperties: false,
 };
 
