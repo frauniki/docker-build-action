@@ -34,8 +34,6 @@ runs:
 
     # Docker Metadata and Build step removed as it was only used for Legacy Format
 
-
-
     - name: Process Multiple Builds
       uses: actions/github-script@v7
       with:

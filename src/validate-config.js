@@ -11,21 +11,21 @@ const core = require('@actions/core');
 function validateConfig(config) {
   const ajv = new Ajv({ allErrors: true });
   addFormats(ajv);
-  
+
   const validate = ajv.compile(combinedSchema);
   const valid = validate(config);
-  
+
   if (!valid) {
     const errors = formatErrors(validate.errors);
     return {
       valid: false,
-      errors
+      errors,
     };
   }
-  
+
   return {
     valid: true,
-    errors: []
+    errors: [],
   };
 }
 
@@ -35,10 +35,10 @@ function validateConfig(config) {
  * @returns {Array} - Formatted error messages
  */
 function formatErrors(errors) {
-  return errors.map(error => {
+  return errors.map((error) => {
     const path = error.instancePath || '';
     const property = error.params.missingProperty || '';
-    
+
     switch (error.keyword) {
       case 'required':
         return `Missing required property: ${property}`;
@@ -61,21 +61,21 @@ function formatErrors(errors) {
  */
 function validateAndLogErrors(config) {
   const result = validateConfig(config);
-  
+
   if (!result.valid) {
     core.error('Configuration validation failed:');
-    result.errors.forEach(error => {
+    result.errors.forEach((error) => {
       core.error(`- ${error}`);
     });
     core.setFailed('Invalid configuration file');
     return false;
   }
-  
+
   core.info('Configuration validation passed');
   return true;
 }
 
 module.exports = {
   validateConfig,
-  validateAndLogErrors
+  validateAndLogErrors,
 };

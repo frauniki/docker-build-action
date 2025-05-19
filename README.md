@@ -18,9 +18,9 @@ name: Build Docker Image
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build:
@@ -28,14 +28,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Build Docker image
         uses: frauniki/docker-build-action@main
         with:
@@ -50,26 +50,26 @@ Create a `docker-build.yaml` file in the root of your repository. You can define
 
 ```yaml
 builds:
-  - name: app                                # Name of the build (optional, default: "build-{index}")
-    context: .                               # Docker build context (default: ".")
-    dockerfile: Dockerfile                   # Path to Dockerfile (default: "Dockerfile")
-    platforms: linux/amd64,linux/arm64       # Platforms to build for (default: "linux/amd64")
-    image: ghcr.io/username/app              # Image name (required)
-    push: true                               # Whether to push the image (default: false)
-    registry: ghcr.io                        # Docker registry to push to (default: "ghcr.io")
-    tags:                                    # Tags configuration (supports list format)
+  - name: app # Name of the build (optional, default: "build-{index}")
+    context: . # Docker build context (default: ".")
+    dockerfile: Dockerfile # Path to Dockerfile (default: "Dockerfile")
+    platforms: linux/amd64,linux/arm64 # Platforms to build for (default: "linux/amd64")
+    image: ghcr.io/username/app # Image name (required)
+    push: true # Whether to push the image (default: false)
+    registry: ghcr.io # Docker registry to push to (default: "ghcr.io")
+    tags: # Tags configuration (supports list format)
       - type: ref
         event: branch
       - type: semver
-        pattern: "{{version}}"
+        pattern: '{{version}}'
       - type: raw
         value: latest
-    flavor:                                  # Flavor configuration (same format as docker/metadata-action)
+    flavor: # Flavor configuration (same format as docker/metadata-action)
       latest: auto
-    labels:                                  # Labels configuration (same format as docker/metadata-action)
+    labels: # Labels configuration (same format as docker/metadata-action)
       org.opencontainers.image.title: App Image
       org.opencontainers.image.description: My App Docker Image
-      
+
   - name: worker
     context: ./worker
     dockerfile: Dockerfile.worker
@@ -113,12 +113,12 @@ tags:
   - type: ref
     event: branch
   - type: semver
-    pattern: "{{version}}"
-  
+    pattern: '{{version}}'
+
 # Flavor configuration (same format as docker/metadata-action)
 flavor:
   latest: auto
-  
+
 # Labels configuration (same format as docker/metadata-action)
 labels:
   org.opencontainers.image.title: My Image
@@ -127,9 +127,9 @@ labels:
 
 ## Inputs
 
-| Name | Description | Required | Default |
-|------|-------------|----------|---------|
-| `config-file` | Path to the docker-build.yaml configuration file | No | `docker-build.yaml` |
+| Name          | Description                                      | Required | Default             |
+| ------------- | ------------------------------------------------ | -------- | ------------------- |
+| `config-file` | Path to the docker-build.yaml configuration file | No       | `docker-build.yaml` |
 
 ## Tags List Format
 
@@ -140,7 +140,7 @@ tags:
   - type: ref
     event: branch
   - type: semver
-    pattern: "{{version}}"
+    pattern: '{{version}}'
   - type: raw
     value: latest
 ```

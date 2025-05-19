@@ -14,44 +14,44 @@ const buildSchema = {
         {
           type: 'object',
           properties: {
-            type: { 
+            type: {
               type: 'string',
-              enum: ['ref', 'schedule', 'semver', 'match', 'edge', 'raw']
-            }
+              enum: ['ref', 'schedule', 'semver', 'match', 'edge', 'raw'],
+            },
           },
-          additionalProperties: true
+          additionalProperties: true,
         },
         {
           type: 'array',
           items: {
             type: 'object',
             properties: {
-              type: { 
+              type: {
                 type: 'string',
-                enum: ['ref', 'schedule', 'semver', 'match', 'edge', 'raw']
-              }
+                enum: ['ref', 'schedule', 'semver', 'match', 'edge', 'raw'],
+              },
             },
-            additionalProperties: true
-          }
-        }
-      ]
+            additionalProperties: true,
+          },
+        },
+      ],
     },
     flavor: {
       oneOf: [
         { type: 'string' },
         {
           type: 'object',
-          additionalProperties: true
-        }
-      ]
+          additionalProperties: true,
+        },
+      ],
     },
     labels: {
       type: 'object',
-      additionalProperties: { type: 'string' }
-    }
+      additionalProperties: { type: 'string' },
+    },
   },
   required: ['image'],
-  additionalProperties: false
+  additionalProperties: false,
 };
 
 const listFormatSchema = {
@@ -59,19 +59,17 @@ const listFormatSchema = {
   properties: {
     builds: {
       type: 'array',
-      items: buildSchema
-    }
+      items: buildSchema,
+    },
   },
   required: ['builds'],
-  additionalProperties: false
+  additionalProperties: false,
 };
-
-
 
 const combinedSchema = listFormatSchema;
 
 module.exports = {
   buildSchema,
   listFormatSchema,
-  combinedSchema
+  combinedSchema,
 };
