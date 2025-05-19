@@ -1,7 +1,7 @@
 
 builds:
   - name: test-image
-    context: ./test
+    context: ./tests/fixtures
     dockerfile: Dockerfile
     platforms: linux/amd64
     image: ghcr.io/frauniki/docker-build-action-test

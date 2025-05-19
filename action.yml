@@ -32,30 +32,11 @@ runs:
           const parseConfig = require('./src/parse-config.js');
           return parseConfig('${{ inputs.config-file }}');
 
-    - name: Docker Metadata and Build (Legacy)
-      if: steps.parse-config.outputs.has_builds == 'false'
-      id: meta
-      uses: docker/metadata-action@v5
-      with:
-        images: ${{ steps.parse-config.outputs.image }}
-        tags: ${{ fromJSON(steps.parse-config.outputs.tags || '{}') }}
-        flavor: ${{ fromJSON(steps.parse-config.outputs.flavor || '{}') }}
-        labels: ${{ fromJSON(steps.parse-config.outputs.labels || '{}') }}
+    # Docker Metadata and Build step removed as it was only used for Legacy Format
 
-    - name: Build and push (Legacy)
-      if: steps.parse-config.outputs.has_builds == 'false'
-      uses: docker/build-push-action@v6
-      with:
-        context: ${{ steps.parse-config.outputs.context }}
-        file: ${{ steps.parse-config.outputs.context }}/${{ steps.parse-config.outputs.dockerfile }}
-        platforms: ${{ steps.parse-config.outputs.platforms }}
-        push: ${{ steps.parse-config.outputs.push }}
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
-        load: ${{ steps.parse-config.outputs.push == 'false' }}
+
 
     - name: Process Multiple Builds
-      if: steps.parse-config.outputs.has_builds == 'true'
       uses: actions/github-script@v7
       with:
         script: |
