@@ -26,7 +26,7 @@ runs:
 
     - name: Parse docker-build.yaml
       id: parse-config
-      uses: actions/github-script@v7
+      uses: actions/github-script@v8
       with:
         script: |
           const parseConfig = require('./src/parse-config.js');
@@ -35,7 +35,7 @@ runs:
     # Docker Metadata and Build step removed as it was only used for Legacy Format
 
     - name: Process Multiple Builds
-      uses: actions/github-script@v7
+      uses: actions/github-script@v8
       with:
         script: |
           const processBuilds = require('./src/process-builds.js');
